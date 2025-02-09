@@ -299,8 +299,8 @@
             <button class="btn btn-primary mt-2" onclick="searchItem()">ค้นหา</button>
         </div>
 
-        <!-- Display Items -->
-        <div id="items-container"></div>
+        <!-- Display Item -->
+        <div id="item-container"></div>
 
         <!-- Add Item Form -->
         <div class="mb-3">
@@ -311,57 +311,69 @@
             <input type="number" id="addId" class="form-control mt-2" placeholder="Student ID" />
             <button class="btn btn-primary mt-2" onclick="addItem()">เพิ่ม</button>
         </div>
+
+        <!-- Edit Form -->
+        <div id="editForm" style="display: none;">
+            <h3>แก้ไขข้อมูล</h3>
+            <input type="text" id="editName" class="form-control" placeholder="Student Name" />
+            <input type="number" id="editId" class="form-control mt-2" placeholder="Student ID" />
+            <button class="btn btn-warning mt-2" onclick="saveEditItem()">บันทึกการแก้ไข</button>
+            <button class="btn btn-secondary mt-2" onclick="cancelEdit()">ยกเลิก</button>
+        </div>
     </div>
 
 
     <script>
         let items = [];
+        let currentItem = null; // To store the current item for edit
 
+        // Fetch items from the server
         async function fetchItems() {
             try {
                 let response = await fetch("http://localhost:3000/items");
                 let data = await response.json();
                 items = data;
-                displayItems(items);
             } catch (error) {
                 console.error("Error fetching items:", error);
             }
         }
 
-        function displayItems(items) {
-            const container = document.getElementById('items-container');
-            container.innerHTML = '';
+        // Display a single item
+        function displayItem(item) {
+            const container = document.getElementById('item-container');
+            container.innerHTML = ''; // Clear previous results
 
-            items.forEach(item => {
+            if (item) {
                 const itemDiv = document.createElement('div');
                 itemDiv.classList.add('item');
-
                 itemDiv.innerHTML = `
-            <div class="d-flex justify-content-between">
-                <span>ชื่อ: ${item.name}</span>
-                <span>ID: ${item.id}</span>
-            </div>
-            <button class="btn btn-outline-light" onclick="editItem(${item.id})">แก้ไข</button>
-            <button class="btn btn-danger" onclick="deleteItem(${item.id})">ลบ</button>
-        `;
-
+                    <div class="d-flex justify-content-between">
+                        <span>ชื่อ: ${item.name}</span>
+                        <span>ID: ${item.id}</span>
+                    </div>
+                    <button class="btn btn-outline-light" onclick="editItem(${item.id})">แก้ไข</button>
+                    <button class="btn btn-danger" onclick="deleteItem(${item.id})">ลบ</button>
+                `;
                 container.appendChild(itemDiv);
-            });
+            } else {
+                container.innerHTML = '<p>ไม่พบข้อมูลที่ค้นหา</p>';
+            }
         }
 
+        // Search for an item by ID or Name
         function searchItem() {
             const searchQuery = document.getElementById('searchId').value.toLowerCase();
-            const filteredItems = items.filter(item =>
-                item.id.toString().includes(searchQuery) || item.name.toLowerCase().includes(searchQuery)
-            );
-            displayItems(filteredItems);
+            const item = items.find(i => i.id.toString().includes(searchQuery) || i.name.toLowerCase().includes(searchQuery));
+            displayItem(item); // Display only the matched item
         }
 
+        // Toggle Add Form visibility
         function toggleAddForm() {
             const addForm = document.getElementById('addForm');
             addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
         }
 
+        // Add new item
         function addItem() {
             const name = document.getElementById('addName').value;
             const id = document.getElementById('addId').value;
@@ -369,7 +381,7 @@
             if (name && id) {
                 const newItem = { id, name };
                 items.push(newItem);
-                displayItems(items);
+                displayItem(newItem); // Display the new item after adding
                 document.getElementById('addName').value = '';
                 document.getElementById('addId').value = '';
                 document.getElementById('addForm').style.display = 'none';
@@ -378,20 +390,37 @@
             }
         }
 
+        // Edit an item
         function editItem(id) {
-            const item = items.find(item => item.id === id);
-            if (item) {
-                const newName = prompt("แก้ไขชื่อ:", item.name);
-                if (newName) {
-                    item.name = newName;
-                    displayItems(items);
-                }
+            currentItem = items.find(item => item.id === id);
+            if (currentItem) {
+                document.getElementById('editName').value = currentItem.name;
+                document.getElementById('editId').value = currentItem.id;
+                document.getElementById('editForm').style.display = 'block';
             }
         }
 
+        // Save edited item
+        function saveEditItem() {
+            if (currentItem) {
+                currentItem.name = document.getElementById('editName').value;
+                currentItem.id = document.getElementById('editId').value;
+                displayItem(currentItem); // Display updated item
+                document.getElementById('editForm').style.display = 'none';
+                currentItem = null; // Reset current item
+            }
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            document.getElementById('editForm').style.display = 'none';
+            currentItem = null; // Reset current item
+        }
+
+        // Delete an item
         function deleteItem(id) {
             items = items.filter(item => item.id !== id);
-            displayItems(items);
+            displayItem(null); // Clear the displayed item
         }
 
         window.onload = function () {
@@ -399,73 +428,19 @@
             fetchItems();
         };
 
-
+        // Particles.js setup
         particlesJS("particles-js", {
             particles: {
-                number: {
-                    value: 100,
-                    density: {
-                        enable: true,
-                        value_area: 800
-                    }
-                },
-                color: {
-                    value: "#ffffff"
-                },
-                shape: {
-                    type: "circle",
-                    stroke: {
-                        width: 0,
-                        color: "#000000"
-                    }
-                },
-                opacity: {
-                    value: 0.5,
-                    random: true,
-                    anim: {
-                        enable: true,
-                        speed: 1,
-                        opacity_min: 0.1,
-                        sync: false
-                    }
-                },
-                size: {
-                    value: 3,
-                    random: true,
-                    anim: {
-                        enable: true,
-                        speed: 4,
-                        size_min: 0.1,
-                        sync: false
-                    }
-                },
-                move: {
-                    enable: true,
-                    speed: 2,
-                    direction: "none",
-                    random: false,
-                    straight: false,
-                    out_mode: "out",
-                    bounce: false,
-                    attract: {
-                        enable: false,
-                        rotateX: 600,
-                        rotateY: 1200
-                    }
-                }
+                number: { value: 100, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle", stroke: { width: 0, color: "#000000" } },
+                opacity: { value: 0.5, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 4, size_min: 0.1, sync: false } },
+                move: { enable: true, speed: 2, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
             },
             interactivity: {
                 detect_on: "canvas",
-                events: {
-                    onhover: {
-                        enable: true,
-                        mode: "repulse"
-                    },
-                    onclick: {
-                        enable: true,
-                        mode: "push"
-                    }
-                }
+                events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" } }
             }
         });
 
