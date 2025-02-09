@@ -1,12 +1,59 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>จัดการข้อมูลนักศึกษา</title>
   <style>
-    /* CSS ที่คุณมีอยู่แล้ว */
-    /* ปรับเพิ่มช่องกรอกข้อมูล major และ GPA ในฟอร์ม */
+    /* สไตล์พื้นฐานของ body */
+    #studentList {
+      max-height: 400px;
+      /* กำหนดความสูงสูงสุดสำหรับรายการ */
+      overflow-y: auto;
+      /* เปิดใช้งานการเลื่อนในแนวตั้ง */
+      padding-right: 10px;
+      /* เพิ่มพื้นที่เล็กน้อยให้กับ scrollbar */
+    }
+
+    html,
+    body {
+      height: 100%;
+      /* ให้ body มีความสูงเต็มหน้าจอ */
+      margin: 0;
+      padding: 0;
+      display: grid;
+      /* ใช้ grid */
+      place-items: center;
+      /* จัดเนื้อหาให้ตรงกลางทั้งแนวนอนและแนวตั้ง */
+      overflow: hidden;
+      /* ป้องกันการเลื่อนภายนอก */
+    }
+
+    .container {
+      width: 85%;
+      max-width: 900px;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #333;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+
     .input-container {
       display: flex;
       justify-content: space-between;
@@ -14,27 +61,31 @@
       margin-bottom: 20px;
     }
 
-    input[type="text"], input[type="number"] {
-      width: calc(50% - 15px);
-      padding: 10px;
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
       font-size: 1rem;
-      border: 2px solid #ccc;
-      border-radius: 6px;
-      transition: border-color 0.3s ease;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      transition: all 0.3s ease;
     }
 
-    input[type="text"]:focus, input[type="number"]:focus {
+    input[type="text"]:focus,
+    input[type="number"]:focus {
       border-color: #4CAF50;
       outline: none;
+      background-color: #fff;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       font-size: 1rem;
       border: none;
       background-color: #4CAF50;
       color: white;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
@@ -42,8 +93,54 @@
     button:hover {
       background-color: #45a049;
     }
+
+    .list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .list-item {
+      background-color: #f9f9f9;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .actions button {
+      margin-left: 10px;
+      background-color: #FF9800;
+      transition: background-color 0.3s ease;
+    }
+
+    .actions button:hover {
+      background-color: #f57c00;
+    }
+
+    .list-item span {
+      flex: 1;
+      font-size: 1rem;
+      color: #555;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* คำแนะนำหากไม่มีข้อมูลนักศึกษา */
+    .no-student {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #888;
+      margin-top: 20px;
+    }
   </style>
 </head>
+
 <body>
 
   <div class="container">
@@ -68,7 +165,11 @@
     </div>
 
     <h2>รายการนักศึกษา</h2>
-    <ul id="studentList" class="list"></ul>
+    <ul id="studentList" class="list">
+      <!-- แสดงข้อมูลนักศึกษาที่นี่ -->
+    </ul>
+
+    <div class="no-student" id="noStudentMessage">ไม่มีข้อมูลนักศึกษา</div>
   </div>
 
   <script>
@@ -86,21 +187,27 @@
 
     function displayStudents(students) {
       const list = document.getElementById('studentList');
+      const noStudentMessage = document.getElementById('noStudentMessage');
       list.innerHTML = '';
-      students.forEach(student => {
-        const listItem = document.createElement('li');
-        listItem.classList.add('list-item');
-        listItem.innerHTML = `
-          <span>${student.name} (ID: ${student.id})</span>
-          <span>สาขาวิชา: ${student.major}</span>
-          <span>GPA: ${student.gpa}</span>
-          <div class="actions">
-            <button onclick="editStudent('${student._id}')">แก้ไข</button>
-            <button onclick="deleteStudent('${student._id}')">ลบ</button>
-          </div>
-        `;
-        list.appendChild(listItem);
-      });
+      if (students.length === 0) {
+        noStudentMessage.style.display = 'block';
+      } else {
+        noStudentMessage.style.display = 'none';
+        students.forEach(student => {
+          const listItem = document.createElement('li');
+          listItem.classList.add('list-item');
+          listItem.innerHTML = `
+            <span>${student.name} (ID: ${student.id})</span>
+            <span>สาขาวิชา: ${student.major}</span>
+            <span>GPA: ${student.gpa}</span>
+            <div class="actions">
+              <button onclick="editStudent('${student._id}')">แก้ไข</button>
+              <button onclick="deleteStudent('${student._id}')">ลบ</button>
+            </div>
+          `;
+          list.appendChild(listItem);
+        });
+      }
     }
 
     async function addStudent() {
@@ -162,21 +269,31 @@
     }
 
     async function searchStudent() {
-      const query = document.getElementById('searchQuery').value.trim();
-      if (!query) return fetchStudents();
+      const query = document.getElementById('searchQuery').value.trim().toLowerCase();
+      if (!query) return fetchStudents();  // ถ้าไม่มีคำค้นหาให้แสดงข้อมูลทั้งหมด
 
       try {
         const response = await fetch(`${apiUrl}/search?q=${query}`);
-        const student = await response.json();
-        displayStudents([student]);
+        const students = await response.json();
+
+        // ถ้าไม่มีผลลัพธ์
+        if (students.length === 0) {
+          alert("ไม่พบข้อมูลนักศึกษาที่ตรงกับคำค้นหา");
+        }
+
+        // แสดงผลลัพธ์ที่ค้นพบ
+        displayStudents(students);
       } catch (error) {
         console.error("Error searching student:", error);
       }
     }
+
+
 
     // เรียกใช้งานเมื่อเริ่มต้น
     fetchStudents();
   </script>
 
 </body>
+
 </html>
