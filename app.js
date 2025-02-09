@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(cors()); // เปิดใช้งาน CORS
 
 let db;
-const client = new MongoClient("mongodb://localhost:27017");
+const client = new MongoClient("mongodb://127.0.0.1:27017");
 
 client.connect().then(() => {
     db = client.db("university");
