@@ -28,10 +28,8 @@ app.get('/students', async (req, res) => {
 app.get('/students/student/:student', async (req, res) => {
     try {
         let studentId = req.params.student;
-
-        // ตรวจสอบว่า studentId เป็นตัวเลขหรือไม่
         if (!isNaN(studentId)) {
-            studentId = parseInt(studentId); // แปลงเป็นตัวเลขถ้าทำได้
+            studentId = parseInt(studentId); 
         }
 
         const student = await db.collection("student").findOne({ student: studentId });
@@ -64,8 +62,6 @@ app.put('/students/:id', async (req, res) => {
     try {
         const id = req.params.id;
         const data = req.body;
-
-        // ตรวจสอบว่า ObjectId ถูกต้องหรือไม่
         if (!ObjectId.isValid(id)) {
             return res.status(400).json({ error: "Invalid student ID" });
         }
