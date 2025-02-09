@@ -84,28 +84,34 @@ app.delete('/students/:id', async (req, res) => {
 });
 app.get('/students/search', async (req, res) => {
     try {
-      const query = req.query.q.trim().toLowerCase();  // รับคำค้นหาและตัดช่องว่าง
-      if (!query) {
-        return res.status(400).json({ error: "Missing search query" });
-      }
-  
-      // ค้นหานักศึกษาที่มีชื่อหรือ ID ตรงกับคำค้นหา
-      const students = await db.collection("students").find({
-        $or: [
-          { name: { $regex: query, $options: 'i' } },  // ค้นหาชื่อที่มีคำค้นหา
-          { id: { $regex: query, $options: 'i' } }  // ค้นหาหมายเลข ID ที่ตรงกับคำค้นหา
-        ]
-      }).toArray();
-  
-      // ส่งกลับข้อมูลที่ค้นพบ
-      res.json(students);
+        const query = req.query.q.trim().toLowerCase();  // รับคำค้นหาและตัดช่องว่าง
+        if (!query) {
+            return res.status(400).json({ error: "Missing search query" });
+        }
+
+        // ค้นหานักศึกษาที่มีชื่อหรือ ID ตรงกับคำค้นหา
+        const students = await db.collection("students").find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },  // ค้นหาชื่อที่มีคำค้นหา
+                {
+                    id: {
+                        $regex: query,
+                        $options: 'i'
+                    }
+                }  // ค้นหาหมายเลข ID ที่ตรงกับคำค้นหา
+            ]
+        }).toArray();
+
+        // ส่งกลับข้อมูลที่ค้นพบ
+        res.json(students);
     } catch (err) {
-      console.error("Error searching students:", err);
-      res.status(500).json({ error: "Error searching students" });
+        console.error("Error searching students:", err);
+        res.status(500).json({ error: "Error searching students" });
     }
-  });
-  
-  
+});
+
+
+
 
 app.listen(3000, () => {
     console.log('Server started on port 3000');
