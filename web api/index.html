@@ -211,82 +211,83 @@
     }
 
     async function addStudent() {
-      const name = document.getElementById('studentName').value.trim();
-      const id = document.getElementById('studentId').value.trim();
-      const major = document.getElementById('studentMajor').value.trim();
-      const gpa = document.getElementById('studentGPA').value.trim();
+  const name = document.getElementById('studentName').value.trim();
+  const id = document.getElementById('studentId').value.trim();  // ไม่ต้องแปลงเป็น int แล้ว
+  const major = document.getElementById('studentMajor').value.trim();
+  const gpa = document.getElementById('studentGPA').value.trim();
 
-      if (!name || !id || !major || !gpa) {
-        alert('กรุณากรอกชื่อ, ID, สาขาวิชา และ GPA');
-        return;
-      }
+  if (!name || !id || !major || !gpa) {
+    alert('กรุณากรอกชื่อ, ID, สาขาวิชา และ GPA');
+    return;
+  }
 
-      const studentData = { name, id: parseInt(id), major, gpa: parseFloat(gpa) };
+  const studentData = { name, id, major, gpa: parseFloat(gpa) };
 
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(studentData),
-        });
-        const newStudent = await response.json();
-        fetchStudents(); // รีเฟรชรายการหลังจากเพิ่มข้อมูล
-      } catch (error) {
-        console.error("Error adding student:", error);
-      }
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(studentData),
+    });
+    const newStudent = await response.json();
+    fetchStudents(); // รีเฟรชรายการหลังจากเพิ่มข้อมูล
+  } catch (error) {
+    console.error("Error adding student:", error);
+  }
+}
+
+async function searchStudent() {
+  const query = document.getElementById('searchQuery').value.trim().toLowerCase();
+  if (!query) return fetchStudents();  // ถ้าไม่มีคำค้นหาให้แสดงข้อมูลทั้งหมด
+
+  try {
+    const response = await fetch(`${apiUrl}/search?q=${query}`);
+    const students = await response.json();
+
+    // ถ้าไม่มีผลลัพธ์
+    if (students.length === 0) {
+      alert("ไม่พบข้อมูลนักศึกษาที่ตรงกับคำค้นหา");
     }
 
-    async function deleteStudent(id) {
-      try {
-        const response = await fetch(`${apiUrl}/${id}`, {
-          method: 'DELETE',
-        });
-        await response.json();
-        fetchStudents(); // รีเฟรชรายการหลังจากลบข้อมูล
-      } catch (error) {
-        console.error("Error deleting student:", error);
-      }
+    // แสดงผลลัพธ์ที่ค้นพบ
+    displayStudents(students);
+  } catch (error) {
+    console.error("Error searching student:", error);
+  }
+}
+
+async function deleteStudent(id) {
+  try {
+    const response = await fetch(`${apiUrl}/${id}`, {
+      method: 'DELETE',
+    });
+    await response.json();
+    fetchStudents(); // รีเฟรชรายการหลังจากลบข้อมูล
+  } catch (error) {
+    console.error("Error deleting student:", error);
+  }
+}
+
+async function editStudent(id) {
+  const name = prompt("กรอกชื่อใหม่:");
+  const major = prompt("กรอกสาขาวิชาใหม่:");
+  const gpa = prompt("กรอก GPA ใหม่:");
+
+  if (name && major && gpa) {
+    try {
+      const response = await fetch(`${apiUrl}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, major, gpa: parseFloat(gpa) }),
+      });
+      const updatedStudent = await response.json();
+      fetchStudents(); // รีเฟรชรายการหลังจากแก้ไขข้อมูล
+    } catch (error) {
+      console.error("Error updating student:", error);
     }
+  }
+}
 
-    async function editStudent(id) {
-      const name = prompt("กรอกชื่อใหม่:");
-      const major = prompt("กรอกสาขาวิชาใหม่:");
-      const gpa = prompt("กรอก GPA ใหม่:");
-
-      if (name && major && gpa) {
-        try {
-          const response = await fetch(`${apiUrl}/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, major, gpa: parseFloat(gpa) }),
-          });
-          const updatedStudent = await response.json();
-          fetchStudents(); // รีเฟรชรายการหลังจากแก้ไขข้อมูล
-        } catch (error) {
-          console.error("Error updating student:", error);
-        }
-      }
-    }
-
-    async function searchStudent() {
-      const query = document.getElementById('searchQuery').value.trim().toLowerCase();
-      if (!query) return fetchStudents();  // ถ้าไม่มีคำค้นหาให้แสดงข้อมูลทั้งหมด
-
-      try {
-        const response = await fetch(`${apiUrl}/search?q=${query}`);
-        const students = await response.json();
-
-        // ถ้าไม่มีผลลัพธ์
-        if (students.length === 0) {
-          alert("ไม่พบข้อมูลนักศึกษาที่ตรงกับคำค้นหา");
-        }
-
-        // แสดงผลลัพธ์ที่ค้นพบ
-        displayStudents(students);
-      } catch (error) {
-        console.error("Error searching student:", error);
-      }
-    }
 
 
 
