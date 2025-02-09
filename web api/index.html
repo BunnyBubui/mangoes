@@ -114,7 +114,6 @@
             width: 50px;
             height: 50px;
             object-fit: cover;
-
         }
 
         @keyframes glow {
@@ -191,7 +190,6 @@
             .container-right {
                 width: 200px;
             }
-
         }
 
         .container-right {
@@ -285,7 +283,7 @@
 </head>
 
 <body>
-    <div id="particles-js"></div>
+    
     <div id="loader">
         <div class="spinner"></div>
     </div>
@@ -322,7 +320,6 @@
         </div>
     </div>
 
-
     <script>
         let items = [];
         let currentItem = null; // To store the current item for edit
@@ -330,8 +327,8 @@
         // Fetch items from the server
         async function fetchItems() {
             try {
-                let response = await fetch("http://localhost:3000/items");
-                let data = await response.json();
+                const response = await fetch("http://localhost:3000/students");
+                const data = await response.json();
                 items = data;
             } catch (error) {
                 console.error("Error fetching items:", error);
@@ -351,8 +348,8 @@
                         <span>ชื่อ: ${item.name}</span>
                         <span>ID: ${item.id}</span>
                     </div>
-                    <button class="btn btn-outline-light" onclick="editItem(${item.id})">แก้ไข</button>
-                    <button class="btn btn-danger" onclick="deleteItem(${item.id})">ลบ</button>
+                    <button class="btn btn-outline-light" onclick="editItem('${item._id}')">แก้ไข</button>
+                    <button class="btn btn-danger" onclick="deleteItem('${item._id}')">ลบ</button>
                 `;
                 container.appendChild(itemDiv);
             } else {
@@ -361,10 +358,15 @@
         }
 
         // Search for an item by ID or Name
-        function searchItem() {
-            const searchQuery = document.getElementById('searchId').value.toLowerCase();
-            const item = items.find(i => i.id.toString().includes(searchQuery) || i.name.toLowerCase().includes(searchQuery));
-            displayItem(item); // Display only the matched item
+        async function searchItem() {
+            const searchQuery = document.getElementById('searchId').value;
+            try {
+                const response = await fetch(`http://localhost:3000/students/search?q=${searchQuery}`);
+                const data = await response.json();
+                displayItem(data);
+            } catch (error) {
+                console.error("Error searching item:", error);
+            }
         }
 
         // Toggle Add Form visibility
@@ -374,17 +376,26 @@
         }
 
         // Add new item
-        function addItem() {
+        async function addItem() {
             const name = document.getElementById('addName').value;
             const id = document.getElementById('addId').value;
 
             if (name && id) {
-                const newItem = { id, name };
-                items.push(newItem);
-                displayItem(newItem); // Display the new item after adding
-                document.getElementById('addName').value = '';
-                document.getElementById('addId').value = '';
-                document.getElementById('addForm').style.display = 'none';
+                try {
+                    const response = await fetch("http://localhost:3000/students", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ id: parseInt(id), name }),
+                    });
+                    const data = await response.json();
+                    console.log("Student added:", data);
+                    fetchItems(); // Refresh the list
+                    document.getElementById('addName').value = '';
+                    document.getElementById('addId').value = '';
+                    document.getElementById('addForm').style.display = 'none';
+                } catch (error) {
+                    console.error("Error adding item:", error);
+                }
             } else {
                 alert("กรุณากรอกข้อมูลให้ครบถ้วน");
             }
@@ -392,7 +403,7 @@
 
         // Edit an item
         function editItem(id) {
-            currentItem = items.find(item => item.id === id);
+            currentItem = items.find(item => item._id === id);
             if (currentItem) {
                 document.getElementById('editName').value = currentItem.name;
                 document.getElementById('editId').value = currentItem.id;
@@ -401,13 +412,25 @@
         }
 
         // Save edited item
-        function saveEditItem() {
+        async function saveEditItem() {
             if (currentItem) {
-                currentItem.name = document.getElementById('editName').value;
-                currentItem.id = document.getElementById('editId').value;
-                displayItem(currentItem); // Display updated item
-                document.getElementById('editForm').style.display = 'none';
-                currentItem = null; // Reset current item
+                const name = document.getElementById('editName').value;
+                const id = document.getElementById('editId').value;
+
+                try {
+                    const response = await fetch(`http://localhost:3000/students/${currentItem._id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, id: parseInt(id) }),
+                    });
+                    const data = await response.json();
+                    console.log("Student updated:", data);
+                    fetchItems(); // Refresh the list
+                    document.getElementById('editForm').style.display = 'none';
+                    currentItem = null; // Reset current item
+                } catch (error) {
+                    console.error("Error updating item:", error);
+                }
             }
         }
 
@@ -418,11 +441,20 @@
         }
 
         // Delete an item
-        function deleteItem(id) {
-            items = items.filter(item => item.id !== id);
-            displayItem(null); // Clear the displayed item
+        async function deleteItem(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/students/${id}`, {
+                    method: "DELETE",
+                });
+                const data = await response.json();
+                console.log("Student deleted:", data);
+                fetchItems(); // Refresh the list
+            } catch (error) {
+                console.error("Error deleting item:", error);
+            }
         }
 
+        // Load data when the page loads
         window.onload = function () {
             document.getElementById('loader').style.display = 'none';
             fetchItems();
