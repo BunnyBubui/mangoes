@@ -5,42 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>จัดการข้อมูลนักศึกษา</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f2f5;
-      color: #333;
-      line-height: 1.6;
-    }
-
-    .container {
-      width: 85%;
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 20px;
-      background-color: #fff;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 2rem;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      color: #555;
-      margin-bottom: 10px;
-    }
-
+    /* CSS ที่คุณมีอยู่แล้ว */
+    /* ปรับเพิ่มช่องกรอกข้อมูล major และ GPA ในฟอร์ม */
     .input-container {
       display: flex;
       justify-content: space-between;
@@ -48,7 +14,7 @@
       margin-bottom: 20px;
     }
 
-    input[type="text"] {
+    input[type="text"], input[type="number"] {
       width: calc(50% - 15px);
       padding: 10px;
       font-size: 1rem;
@@ -57,7 +23,7 @@
       transition: border-color 0.3s ease;
     }
 
-    input[type="text"]:focus {
+    input[type="text"]:focus, input[type="number"]:focus {
       border-color: #4CAF50;
       outline: none;
     }
@@ -76,92 +42,6 @@
     button:hover {
       background-color: #45a049;
     }
-
-    .list {
-      list-style-type: none;
-      padding: 0;
-    }
-
-    .list-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px;
-      margin-bottom: 10px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .list-item:hover {
-      background-color: #f1f1f1;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .actions button {
-      background-color: #f44336;
-      margin-left: 10px;
-    }
-
-    .actions button:hover {
-      background-color: #e53935;
-    }
-
-    .actions button, .list-item span {
-      font-size: 0.95rem;
-    }
-
-    .actions {
-      display: flex;
-    }
-
-    .actions button {
-      padding: 6px 12px;
-      font-size: 0.9rem;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-    }
-
-    .actions button:first-child {
-      background-color: #4CAF50;
-    }
-
-    .actions button:first-child:hover {
-      background-color: #45a049;
-    }
-
-    #searchQuery {
-      width: 100%;
-      padding: 10px;
-      font-size: 1rem;
-      border: 2px solid #ccc;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      transition: border-color 0.3s ease;
-    }
-
-    #searchQuery:focus {
-      border-color: #4CAF50;
-      outline: none;
-    }
-
-    @media (max-width: 768px) {
-      .input-container {
-        flex-direction: column;
-      }
-
-      input[type="text"] {
-        width: 100%;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-
   </style>
 </head>
 <body>
@@ -172,8 +52,14 @@
     <div class="input-container">
       <input type="text" id="studentName" placeholder="กรอกชื่อใหม่">
       <input type="text" id="studentId" placeholder="กรอก ID ของนักศึกษา (เพื่อค้นหาหรือแก้ไข)">
-      <button onclick="addStudent()">เพิ่มข้อมูลนักศึกษา</button>
     </div>
+
+    <div class="input-container">
+      <input type="text" id="studentMajor" placeholder="กรอกสาขาวิชา">
+      <input type="number" id="studentGPA" placeholder="กรอก GPA" step="0.01">
+    </div>
+
+    <button onclick="addStudent()">เพิ่มข้อมูลนักศึกษา</button>
 
     <h2>ค้นหานักศึกษาตาม ID หรือ ชื่อ</h2>
     <div class="input-container">
@@ -206,6 +92,8 @@
         listItem.classList.add('list-item');
         listItem.innerHTML = `
           <span>${student.name} (ID: ${student.id})</span>
+          <span>สาขาวิชา: ${student.major}</span>
+          <span>GPA: ${student.gpa}</span>
           <div class="actions">
             <button onclick="editStudent('${student._id}')">แก้ไข</button>
             <button onclick="deleteStudent('${student._id}')">ลบ</button>
@@ -218,14 +106,16 @@
     async function addStudent() {
       const name = document.getElementById('studentName').value.trim();
       const id = document.getElementById('studentId').value.trim();
+      const major = document.getElementById('studentMajor').value.trim();
+      const gpa = document.getElementById('studentGPA').value.trim();
 
-      if (!name || !id) {
-        alert('กรุณากรอกชื่อและ ID');
+      if (!name || !id || !major || !gpa) {
+        alert('กรุณากรอกชื่อ, ID, สาขาวิชา และ GPA');
         return;
       }
 
-      const studentData = { name, id: parseInt(id) };
-      
+      const studentData = { name, id: parseInt(id), major, gpa: parseFloat(gpa) };
+
       try {
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -253,12 +143,15 @@
 
     async function editStudent(id) {
       const name = prompt("กรอกชื่อใหม่:");
-      if (name) {
+      const major = prompt("กรอกสาขาวิชาใหม่:");
+      const gpa = prompt("กรอก GPA ใหม่:");
+
+      if (name && major && gpa) {
         try {
           const response = await fetch(`${apiUrl}/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name }),
+            body: JSON.stringify({ name, major, gpa: parseFloat(gpa) }),
           });
           const updatedStudent = await response.json();
           fetchStudents(); // รีเฟรชรายการหลังจากแก้ไขข้อมูล
@@ -275,7 +168,7 @@
       try {
         const response = await fetch(`${apiUrl}/search?q=${query}`);
         const student = await response.json();
-        displayStudents([student]); // แสดงผลลัพธ์เฉพาะรายการที่ค้นหา
+        displayStudents([student]);
       } catch (error) {
         console.error("Error searching student:", error);
       }
