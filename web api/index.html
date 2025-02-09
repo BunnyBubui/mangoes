@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,9 +44,17 @@
         }
 
         @keyframes glow-particle {
-            0%{filter: drop-shadow(0px 0px 0px white);}
-            50%{filter: drop-shadow(0px 0px 20px white);}
-            100%{filter: drop-shadow(0px 0px 0px white);}
+            0% {
+                filter: drop-shadow(0px 0px 0px white);
+            }
+
+            50% {
+                filter: drop-shadow(0px 0px 20px white);
+            }
+
+            100% {
+                filter: drop-shadow(0px 0px 0px white);
+            }
         }
 
         .container {
@@ -105,13 +114,24 @@
             width: 50px;
             height: 50px;
             object-fit: cover;
-            
+
         }
 
-        @keyframes glow{
-            0% {filter:drop-shadow(0px 0px 0px rgb(255, 206, 174)); transform: scale(100%);}
-            50% {filter:drop-shadow(0px 0px 10px rgb(255, 192, 149)); transform: scale(105%);}
-            100% {filter:drop-shadow(0px 0px 0px rgb(255, 206, 174)); transform: scale(100%);}
+        @keyframes glow {
+            0% {
+                filter: drop-shadow(0px 0px 0px rgb(255, 206, 174));
+                transform: scale(100%);
+            }
+
+            50% {
+                filter: drop-shadow(0px 0px 10px rgb(255, 192, 149));
+                transform: scale(105%);
+            }
+
+            100% {
+                filter: drop-shadow(0px 0px 0px rgb(255, 206, 174));
+                transform: scale(100%);
+            }
         }
 
         .profile-container {
@@ -129,9 +149,14 @@
             animation: scale-des 1s;
         }
 
-        @keyframes scale-des{
-            0% {transform: scale(50%);}
-            100% {transform: scale(100%);}
+        @keyframes scale-des {
+            0% {
+                transform: scale(50%);
+            }
+
+            100% {
+                transform: scale(100%);
+            }
         }
 
         @keyframes fadeIn {
@@ -139,6 +164,7 @@
                 opacity: 0;
                 transform: translateY(-100%);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -152,9 +178,14 @@
                 animation: scale 1s;
             }
 
-            @keyframes scale{
-                0% {transform: scale(150%);}
-                100% {transform: scale(100%);}   
+            @keyframes scale {
+                0% {
+                    transform: scale(150%);
+                }
+
+                100% {
+                    transform: scale(100%);
+                }
             }
 
             .container-right {
@@ -176,13 +207,13 @@
             width: 400px;
             animation: fadeIn 0.5s ease-in-out, move-right 2s;
         }
-        
+
         .track-options {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        
+
         .status-display {
             font-size: 18px;
             color: #333;
@@ -213,25 +244,46 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        ::-webkit-scrollbar{
+
+        ::-webkit-scrollbar {
             width: 1vw;
             background-color: #adb473;
-          }
+        }
 
-          ::-webkit-scrollbar-thumb{
+        ::-webkit-scrollbar-thumb {
             width: 1vw;
             background-color: #c6cc96;
             border-radius: 1vw;
-          }
+        }
 
-          ::-webkit-scrollbar-thumb:hover{
+        ::-webkit-scrollbar-thumb:hover {
             background-color: #818752;
-          }
+        }
+
+        #searchId {
+            width: 80%;
+            max-width: 300px;
+            margin: 10px auto;
+        }
+
+        #addForm {
+            margin-top: 20px;
+        }
+
+        #addForm input {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
+
 <body>
     <div id="particles-js"></div>
     <div id="loader">
@@ -239,27 +291,114 @@
     </div>
     <div class="container">
         <h1>ยินดีต้อนรับสู่ Mangoes</h1>
+
+        <!-- Search Form -->
+        <div class="mb-3">
+            <label for="searchId" class="form-label">ค้นหาโดย Student ID หรือ Student Name</label>
+            <input type="text" id="searchId" class="form-control" placeholder="Student ID หรือ Name">
+            <button class="btn btn-primary mt-2" onclick="searchItem()">ค้นหา</button>
+        </div>
+
+        <!-- Display Items -->
         <div id="items-container"></div>
 
+        <!-- Add Item Form -->
+        <div class="mb-3">
+            <button class="btn btn-outline-light" onclick="toggleAddForm()">เพิ่มข้อมูล</button>
+        </div>
+        <div id="addForm" style="display: none;">
+            <input type="text" id="addName" class="form-control" placeholder="Student Name" />
+            <input type="number" id="addId" class="form-control mt-2" placeholder="Student ID" />
+            <button class="btn btn-primary mt-2" onclick="addItem()">เพิ่ม</button>
+        </div>
+    </div>
+
+
     <script>
+        let items = [];
+
         async function fetchItems() {
             try {
                 let response = await fetch("http://localhost:3000/items");
                 let data = await response.json();
-                console.log("Fetched items:", data);
+                items = data;
+                displayItems(items);
             } catch (error) {
                 console.error("Error fetching items:", error);
             }
         }
-    
+
+        function displayItems(items) {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('item');
+
+                itemDiv.innerHTML = `
+            <div class="d-flex justify-content-between">
+                <span>ชื่อ: ${item.name}</span>
+                <span>ID: ${item.id}</span>
+            </div>
+            <button class="btn btn-outline-light" onclick="editItem(${item.id})">แก้ไข</button>
+            <button class="btn btn-danger" onclick="deleteItem(${item.id})">ลบ</button>
+        `;
+
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function searchItem() {
+            const searchQuery = document.getElementById('searchId').value.toLowerCase();
+            const filteredItems = items.filter(item =>
+                item.id.toString().includes(searchQuery) || item.name.toLowerCase().includes(searchQuery)
+            );
+            displayItems(filteredItems);
+        }
+
+        function toggleAddForm() {
+            const addForm = document.getElementById('addForm');
+            addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addItem() {
+            const name = document.getElementById('addName').value;
+            const id = document.getElementById('addId').value;
+
+            if (name && id) {
+                const newItem = { id, name };
+                items.push(newItem);
+                displayItems(items);
+                document.getElementById('addName').value = '';
+                document.getElementById('addId').value = '';
+                document.getElementById('addForm').style.display = 'none';
+            } else {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            }
+        }
+
+        function editItem(id) {
+            const item = items.find(item => item.id === id);
+            if (item) {
+                const newName = prompt("แก้ไขชื่อ:", item.name);
+                if (newName) {
+                    item.name = newName;
+                    displayItems(items);
+                }
+            }
+        }
+
+        function deleteItem(id) {
+            items = items.filter(item => item.id !== id);
+            displayItems(items);
+        }
+
         window.onload = function () {
             document.getElementById('loader').style.display = 'none';
             fetchItems();
         };
 
-        window.onload = function() {
-            document.getElementById('loader').style.display = 'none';
-        };
 
         particlesJS("particles-js", {
             particles: {
@@ -271,7 +410,7 @@
                     }
                 },
                 color: {
-                    value: "#ffffff" 
+                    value: "#ffffff"
                 },
                 shape: {
                     type: "circle",
@@ -332,4 +471,5 @@
 
     </script>
 </body>
+
 </html>
