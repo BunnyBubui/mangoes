@@ -1,13 +1,21 @@
-# Project Mango
-## member 1
-### Banyapon Chaithong 
-### id : 67100784
+# Student Records API
 
-## member 2
-### Basil Mushakij 
-### id : 67104885
+Student CRUD and search API with a browser interface. Use synthetic student records only.
 
+## Technology
 
-## member 3
-### jaturawit yingyuad
-### id : 67109397
+Node.js, Express, MongoDB.
+
+## Portfolio status
+
+Classification: **supporting**. This description reflects the checked-in implementation. It does not assert production usage, ownership of every team contribution, measured performance or a passing test run.
+
+For a resume, describe only your own contributions and include a screenshot or a reproducible demo. No customer, student, payment or credential data is required to review this code.
+
+## Local configuration
+
+Copy any `*.env.example` files to the corresponding local environment paths and fill in your own values. Never commit these filled files. A removed credential must also be revoked at its provider; deleting a file does not remove it from Git history.
+
+## Review and attribution
+
+Team work and third-party assets retain their original authorship and licensing. Check the implementation and existing package scripts for available commands. Scaffolds and deployment-only copies are not complete application showcases.
